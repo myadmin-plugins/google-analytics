@@ -24,5 +24,5 @@ composer require detain/myadmin-google-analytics
 
 ## License
 
-The Google handling plugin for MyAdmin class is licensed under the LGPL-v2 license.
+The Google handling plugin for MyAdmin class is licensed under the LGPL-v2.1 license.
 
