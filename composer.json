@@ -1,5 +1,5 @@
 {
-	"name": "detain/google-analytics",
+	"name": "detain/myadmin-google-analytics",
 	"type": "myadmin-plugin",
 	"description": "Google handling plugin for MyAdmin",
 	"keywords": [
