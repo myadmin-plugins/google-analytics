@@ -43,7 +43,7 @@ class Plugin
 		if ($GLOBALS['tf']->ima == 'admin') {
 			function_requirements('has_acl');
 			if (has_acl('client_billing')) {
-				$menu->add_link('admin', 'choice=none.abuse_admin', '/lib/webhostinghub-glyphs-icons/icons/development-16/Black/icon-spam.png', 'Google');
+				$menu->add_link('admin', 'choice=none.abuse_admin', '/lib/webhostinghub-glyphs-icons/icons/development-16/Black/icon-spam.png', __('Google'));
 			}
 		}
 	}
@@ -53,7 +53,10 @@ class Plugin
 	 */
 	public static function getRequirements(GenericEvent $event)
 	{
-		$loader = $event->getSubject();
+        /**
+         * @var \MyAdmin\Plugins\Loader $this->loader
+         */
+        $loader = $event->getSubject();
 		$loader->add_requirement('class.Google', '/../vendor/detain/myadmin-google-analytics/src/Google.php');
 		$loader->add_requirement('deactivate_kcare', '/../vendor/detain/myadmin-google-analytics/src/abuse.inc.php');
 		$loader->add_requirement('deactivate_abuse', '/../vendor/detain/myadmin-google-analytics/src/abuse.inc.php');
@@ -63,10 +66,13 @@ class Plugin
 	/**
 	 * @param \Symfony\Component\EventDispatcher\GenericEvent $event
 	 */
-	public static function getSettings(GenericEvent $event)
-	{
-		$settings = $event->getSubject();
-		$settings->add_text_setting('General', 'Google', 'abuse_imap_user', 'Google IMAP User:', 'Google IMAP Username', ABUSE_IMAP_USER);
-		$settings->add_text_setting('General', 'Google', 'abuse_imap_pass', 'Google IMAP Pass:', 'Google IMAP Password', ABUSE_IMAP_PASS);
+    public static function getSettings(GenericEvent $event)
+    {
+        /**
+         * @var \MyAdmin\Settings $settings
+         **/
+        $settings = $event->getSubject();
+		$settings->add_text_setting(__('General'), __('Google'), 'abuse_imap_user', __('Google IMAP User'), __('Google IMAP Username'), ABUSE_IMAP_USER);
+		$settings->add_text_setting(__('General'), __('Google'), 'abuse_imap_pass', __('Google IMAP Pass'), __('Google IMAP Password'), ABUSE_IMAP_PASS);
 	}
 }
