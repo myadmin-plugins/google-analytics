@@ -5,6 +5,7 @@ namespace Detain\MyAdminGoogle\Tests;
 use Detain\MyAdminGoogle\Plugin;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
+use Symfony\Component\EventDispatcher\GenericEvent;
 
 /**
  * Tests for the Plugin class.
@@ -159,6 +160,70 @@ class PluginTest extends TestCase
         $paramType = $params[0]->getType();
         $this->assertNotNull($paramType);
         $this->assertSame('Symfony\Component\EventDispatcher\GenericEvent', $paramType->getName());
+    }
+
+    /**
+     * Test that every source getRequirements() registers is a file that exists.
+     *
+     * MyAdmin resolves a requirement as INCLUDE_ROOT.'/'.$source and require_once's
+     * it, so registering a path to a file that was never shipped turns any
+     * function_requirements() call for that name into a fatal. This drives
+     * getRequirements() through a stub loader and resolves each registered source
+     * the way the host would - sources naming this package resolve back to the
+     * package root.
+     *
+     * This package registers nothing today, so the loop body does not run and the
+     * test passes vacuously; the closing assertion still fires, and the test starts
+     * doing real work the moment a registration is added.
+     *
+     * @return void
+     */
+    public function testEveryRegisteredRequirementSourceExists(): void
+    {
+        $loader = new class {
+            /** @var array */
+            public $requirements = [];
+
+            /**
+             * @param string $function
+             * @param string $source
+             * @param mixed $methods
+             * @return void
+             */
+            public function add_requirement(string $function, string $source, $methods = false): void
+            {
+                $this->requirements[$function] = $source;
+            }
+        };
+
+        Plugin::getRequirements(new GenericEvent($loader));
+
+        $packageRoot = dirname(__DIR__);
+        $ownPrefix = '/../vendor/detain/myadmin-google-analytics/';
+        $checked = [];
+
+        foreach ($loader->requirements as $function => $source) {
+            $this->assertIsString($source, "Source registered for '{$function}' must be a string path");
+
+            if (strpos($source, $ownPrefix) === 0) {
+                $path = $packageRoot.'/'.substr($source, strlen($ownPrefix));
+            } else {
+                $path = $packageRoot.'/'.ltrim($source, '/');
+            }
+
+            $this->assertFileExists(
+                $path,
+                "getRequirements() registers '{$function}' => '{$source}' but no such file exists"
+            );
+
+            $checked[] = $function;
+        }
+
+        $this->assertSame(
+            array_keys($loader->requirements),
+            $checked,
+            'Every requirement registered by getRequirements() must be checked'
+        );
     }
 
     /**
